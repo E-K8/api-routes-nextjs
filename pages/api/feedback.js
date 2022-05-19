@@ -1,6 +1,16 @@
 import fs from 'fs';
 import path from 'path';
 
+function buildFeedbackPath() {
+  return path.join(process.cwd(), 'data', 'feedback.json');
+}
+
+function extractFeedback(filePath) {
+  const fileData = fs.readFileSync(filePath);
+  const data = JSON.parse(fileData);
+  return data;
+}
+
 // this function ↓↓↓ is for executing server-side code (and only)
 
 function handler(req, res) {
@@ -15,14 +25,16 @@ function handler(req, res) {
     };
     // store that ^^^ in a database or in a file
 
-    const filePath = path.join(process.cwd(), 'data', 'feedback.json'); //will create absolute path to the folder for us
-    const fileData = fs.readFileSync(filePath);
-    const data = JSON.parse(fileData);
+    const filePath = buildFeedbackPath(); //will create absolute path to the folder for us
+    const data = extractFeedback(filePath);
     data.push(newFeedback);
     fs.writeFileSync(filePath, JSON.stringify(data));
     res.status(201).json({ message: 'Success!', feedback: newFeedback });
   } else {
-    res.status(200).json({ message: 'this works!' });
+    const filePath = buildFeedbackPath(); //will create absolute path to the folder for us
+    const data = extractFeedback(filePath);
+
+    res.status(200).json({ feedback: data });
   }
 }
 
